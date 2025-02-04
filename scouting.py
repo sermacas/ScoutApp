@@ -566,5 +566,3 @@ def server(input, output, session):
         return file_path
 
 app = App(app_ui, server)
-
-run_app(app)
