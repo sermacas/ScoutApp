@@ -1,4 +1,3 @@
-import shiny
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
@@ -17,29 +16,25 @@ import nest_asyncio
 from shiny import run_app
 from docx import Document
 import os
-import json
-
-GOOGLE_SHEETS_CREDENTIALS={
-  "type": "service_account",
-  "project_id": "scoutingapp-449810",
-  "private_key_id": "e9c462980ed50a800cff4ecc2c6e6a2b47e67004",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDFnOHVxbH6wZsz\n2+SXzPt2WrnryJXI2nbtRtANUUipTMCnYbEDE5mVRovzj7iRIK+O7a4B4MJSJE+R\n2LvAKX+TKpvgwdrsftSP1C+j+CkOaLbFVAmyXIgONbavCVHGDeaSGhRd7BO31/jS\nXMBLdMJ2xHuY8R9AmZmyK+IzvOy0WOJMxpK0B/SsR/J7TnxbrXcAQsBCuN50/MDY\ncVZm7m6GbWP7s093hRu9W8T9NNVs8yPAov+Io0vCT3zByk6C3F+mtfoQilHZAewA\ntk+d12WraPQBxlK+IaaVZXVFBRxXLQHibru6VDD1sadIyfx1qmhlFyOVYsPcC2xP\nqh58LxNxAgMBAAECggEACCP5EqkY9ps8pUOA9HbrgfnlUE78SqCjRw2EexP24hCJ\nHCwUUmvfhwx3rfIk+IeH6+OjKC0l3CPmSjwLKfSbroiSEM1zkwv7fixPxRmvOUp7\ngv/+AUS6DxnL24SPA5Flhu2/monj2w4w0BuliUY3T5SzAb8nGi5prDMOF7MH7jrr\nk1aVWs/gwY4W7CYM206Wzh36oes/puWJ26nax2BPCDq7rs/gTQk679R05FJddAwq\nDoJwvZUF5LIb/ijfzJbbhUkp1QxiYH+lGX/QO32y7UyQluGjOn7IAo9ParnN7C/a\nOem161JiL/mWIiwdeUVfafUj9vf1TXCz42rmYws6BQKBgQDs1F5F17Cc1A3Ddefm\nLvOc9kVDpMsMGb+bcbxupy6EjxA5V+SGqfPNSrjoXSGtHeVXngE8suYOarKBWEa2\nuHEv1yCx760fFCsrXEEiglb58v/Pmg9j4kD7HYWarDgGVdM4OTSmGiRfJFzTYGdq\nIpeHekTe8gJ1kC2o8k8WNXEqXQKBgQDVm9s7WhpFMcdzAr+N6jZeQD/vOIzVivz5\nSgCaim1CmVhKnWbMsvd1LXLiPavGDl+AcxcIvdGU5B4pThNBLDzzKFgiD3GCbowd\n9XgR73BbIFyi1XOM6s+4NqEPJkHGqZbQoQ3pn9+lN3RAYpbON2ZabRSCgA/Mce/8\nS3pLlSyEJQKBgApdMNL1oXD7hq6rFj7ohxizXkybhZc9+TigPZLKFisO57LaudF6\n1oSBZJ4mlTayPDsdWwiA+7hdyvoGFvIgGDPzwiaHSpg1lb4MB32vHodJrxAyucGx\nQQ68OACQ0NLWJqwrNLagJj9TpAxMB7qJUQBIxYLMLHdgm97s27EpHY6xAoGAU7Gj\nblfZXy8n5Io5H5ObBcbKxiI0HB8/CzXRkruWH7gRffq6Io4kowbRso9TVGChTqTJ\na6VkDqBqqOhsZua8YtF15rKCWQaTY9Gf3/ce4LWHVk2n3pjKFnVhGZx1vS8JZmkU\nGGuJpyRZKjj2uYm/UsLWfGNMzV//Fa1FF4Q1UvkCgYEA3V3trS8jsPjoUBbpQZ91\nJ5ea4Sw+1eF4nBFr9P73OmoinUTBqo6L1SOJCB535vn1n6P8WqQH1pdCHgP8EjSN\nPT1E+mU8l9qFAngZIoPARpUk8xFlDdDUaQoDIMvbHCU6AgdGlfGumy+gzQi8zTCl\nwaROK3xVSZcYWF6bi+8ZPC4=\n-----END PRIVATE KEY-----\n",
-  "client_email": "scoutingapp@scoutingapp-449810.iam.gserviceaccount.com",
-  "client_id": "116462117737496032163",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/scoutingapp%40scoutingapp-449810.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
-
-json_credentials = json.dumps(GOOGLE_SHEETS_CREDENTIALS)
 
 nest_asyncio.apply()
 
 # Configuración de Google Sheets
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_info(json.loads(json_credentials), scopes=scopes)
+# Cargar la variable de entorno que contiene las credenciales de Google
+creds_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+
+# Verifica si la variable fue cargada correctamente
+if creds_json is None:
+    print("Error: La variable de entorno no está configurada correctamente.")
+else:
+    print("La variable de entorno se ha cargado correctamente.")
+
+# Convierte el JSON cargado en un diccionario y crea las credenciales
+creds_dict = json.loads(creds_json)
+creds = Credentials.from_service_account_info(creds_dict)
+
+# Autoriza el cliente de gspread con las credenciales
 client = gspread.authorize(creds)
 SHEET_ID = "1MXuIF81o1Ts_QbEdhm0X790p4qRYxxtgoi3ufRwzEK8"
 
