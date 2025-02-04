@@ -20,7 +20,8 @@ import os
 nest_asyncio.apply()
 
 # Configuración de Google Sheets
-scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+
 # Cargar la variable de entorno que contiene las credenciales de Google
 creds_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
 
@@ -32,7 +33,11 @@ else:
 
 # Convierte el JSON cargado en un diccionario y crea las credenciales
 creds_dict = json.loads(creds_json)
-creds = Credentials.from_service_account_info(creds_dict)
+# Crear las credenciales con el alcance adecuado
+creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+
+# Autorizar el cliente de gspread con las credenciales
+client = gspread.authorize(creds)
 
 # Autoriza el cliente de gspread con las credenciales
 client = gspread.authorize(creds)
